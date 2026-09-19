@@ -265,7 +265,7 @@ body.dark-login {
       });
       var data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Login failed');
-      location.href = '/admin';
+      location.href = '/admin/';
     } catch (err) {
       errEl.textContent = err.message || 'Cannot reach server';
       errEl.classList.add('show');

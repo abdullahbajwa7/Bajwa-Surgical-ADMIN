@@ -42,7 +42,7 @@
   async function apiFetch(url, opts) {
     const res = await fetch(url, opts);
     if (res.status === 401) {
-      location.href = API + '/admin';
+      location.href = '/admin/login.html';
       throw new Error('Admin login required');
     }
     return res;
@@ -417,8 +417,9 @@
      LOGOUT
      ============================================================ */
   const logoutBtn = $('#logoutBtn');
-  if (logoutBtn) logoutBtn.addEventListener('click', () => {
-    location.href = API + '/api/admin/logout';
+  if (logoutBtn) logoutBtn.addEventListener('click', async () => {
+    try { await fetch(API + '/api/admin/logout', { method: 'POST' }); } catch(e) {}
+    location.href = '/admin/login.html';
   });
 
   /* ============================================================
