@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BAJWA SURGICAL \u2014 Admin Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: linear-gradient(135deg, #0e4230 0%, #0a2e1f 55%, #145c3d 100%);
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  -webkit-font-smoothing: antialiased;
+}
+.login-card {
+  width: min(380px, 100%);
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px 34px 32px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.35);
+  animation: up .5s cubic-bezier(.2,.9,.3,1.1) both;
+}
+@keyframes up { from { opacity: 0; transform: translateY(20px); } }
+.brandline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.logo {
+  width: 50px; height: 50px;
+  border-radius: 14px;
+  object-fit: cover;
+  box-shadow: 0 4px 16px rgba(15,63,43,.18);
+}
+.brandline strong {
+  font-size: 18px;
+  letter-spacing: .01em;
+  color: #1a2b23;
+  line-height: 1.15;
+}
+.brandline small {
+  display: block;
+  font-size: 11px;
+  color: #8aa096;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+.subtitle {
+  text-align: center;
+  font-size: 13px;
+  color: #5a7268;
+  font-weight: 500;
+  margin: 12px 0 24px;
+}
+.err {
+  display: none;
+  background: #fdecea;
+  color: #c0392b;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  border: 1px solid #f5c6cb;
+}
+.err.show { display: block; }
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1a2b23;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #dce6e0;
+  border-radius: 10px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  margin-bottom: 18px;
+  background: #f6f8f7;
+  color: #1a2b23;
+}
+input:focus {
+  border-color: #1a7a52;
+  box-shadow: 0 0 0 3px rgba(26,122,82,.12);
+  background: #fff;
+}
+input::placeholder { color: #8a9e94; }
+.submit-btn {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 800;
+  font-family: inherit;
+  background: linear-gradient(135deg, #1a7a52, #145c3d);
+  color: #fff;
+  cursor: pointer;
+  transition: transform .18s, box-shadow .25s;
+  margin-top: 4px;
+  box-shadow: 0 4px 16px rgba(26,122,82,.28);
+}
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(26,122,82,.38);
+}
+.submit-btn:active { transform: translateY(0); }
+.submit-btn:disabled { opacity: .6; cursor: wait; transform: none; }
+.foot {
+  margin-top: 20px;
+  text-align: center;
+}
+.foot a {
+  color: #8aa096;
+  font-size: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color .15s;
+}
+.foot a:hover { color: #1a7a52; }
+.theme-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 11px;
+  color: #8aa096;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color .15s;
+  background: none;
+  border: none;
+  font-family: inherit;
+}
+.theme-link:hover { color: #1a7a52; }
+
+/* Dark login */
+[data-theme="dark"] body,
+body.dark-login {
+  background: linear-gradient(135deg, #080f0b 0%, #0c1a14 55%, #0a1a12 100%);
+}
+[data-theme="dark"] .login-card,
+.login-card.dark-card {
+  background: #1a2420;
+  border: 1px solid #2a3a32;
+}
+[data-theme="dark"] .brandline strong,
+.login-card.dark-card .brandline strong { color: #e4ede8; }
+[data-theme="dark"] .subtitle,
+.login-card.dark-card .subtitle { color: #8fa89c; }
+[data-theme="dark"] input,
+.login-card.dark-card input {
+  background: #1e2a25;
+  border-color: #2a3a32;
+  color: #e4ede8;
+}
+[data-theme="dark"] input:focus,
+.login-card.dark-card input:focus {
+  background: #243330;
+  border-color: #1a7a52;
+}
+[data-theme="dark"] input::placeholder,
+.login-card.dark-card input::placeholder { color: #5c7a6c; }
+[data-theme="dark"] label,
+.login-card.dark-card label { color: #c4d8cc; }
+[data-theme="dark"] .err,
+.login-card.dark-card .err {
+  background: #2a1515;
+  border-color: #3a2020;
+  color: #ff8a80;
+}
+[data-theme="dark"] .foot a,
+.login-card.dark-card .foot a { color: #5c7a6c; }
+[data-theme="dark"] .theme-link,
+.login-card.dark-card .theme-link { color: #5c7a6c; }
+</style>
+</head>
+<body>
+<div class="login-card" id="loginCard">
+  <div class="brandline">
+    <img src="/images/logo.jpg" alt="" class="logo" onerror="this.style.display='none'">
+    <div><strong>BAJWA SURGICAL</strong><small>Admin Panel</small></div>
+  </div>
+  <p class="subtitle">Sign in to manage your store</p>
+  <div class="err" id="err"></div>
+  <form id="loginForm" novalidate>
+    <label for="user">Username</label>
+    <input type="text" id="user" autocomplete="username" placeholder="Enter username">
+    <label for="pass">Password</label>
+    <input type="password" id="pass" autocomplete="current-password" placeholder="Enter password">
+    <button type="submit" class="submit-btn" id="submitBtn">Sign In</button>
+  </form>
+  <div class="foot"><a href="/">\u2190 Back to store</a></div>
+  <button class="theme-link" id="themeToggle">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41"/></svg>
+    <span id="loginThemeLabel">Dark mode</span>
+  </button>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* Theme */
+  var saved = localStorage.getItem('bs_admin_theme');
+  var isDark = saved === 'dark';
+  function applyLoginTheme(dark) {
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    var card = document.getElementById('loginCard');
+    if (dark) card.classList.add('dark-card');
+    else card.classList.remove('dark-card');
+    var lbl = document.getElementById('loginThemeLabel');
+    if (lbl) lbl.textContent = dark ? 'Light mode' : 'Dark mode';
+  }
+  applyLoginTheme(isDark);
+
+  document.getElementById('themeToggle').addEventListener('click', function () {
+    isDark = !isDark;
+    applyLoginTheme(isDark);
+    localStorage.setItem('bs_admin_theme', isDark ? 'dark' : 'light');
+  });
+
+  /* Login */
+  var form = document.getElementById('loginForm');
+  var errEl = document.getElementById('err');
+  var submitBtn = document.getElementById('submitBtn');
+  var user = document.getElementById('user');
+  var pass = document.getElementById('pass');
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    errEl.classList.remove('show');
+    var username = user.value.trim();
+    var password = pass.value;
+    if (!username || !password) {
+      errEl.textContent = 'Enter username and password';
+      errEl.classList.add('show');
+      return;
+    }
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Signing in\u2026';
+    try {
+      var res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username, password: password }),
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Login failed');
+      location.href = '/admin';
+    } catch (err) {
+      errEl.textContent = err.message || 'Cannot reach server';
+      errEl.classList.add('show');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Sign In';
+    }
+    setTimeout(function () { submitBtn.disabled = false; submitBtn.textContent = 'Sign In'; }, 3000);
+  });
+})();
+</script>
+</body>
+</html>
