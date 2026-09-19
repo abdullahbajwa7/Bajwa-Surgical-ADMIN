@@ -102,7 +102,7 @@
   async function loadImages() {
     try {
       const res = await apiFetch(API + '/api/images');
-      if (res.ok) images = await res.json();
+      if (res.ok) { var d = await res.json(); images = Array.isArray(d) ? d : (d.images || []); }
     } catch (e) { images = []; }
   }
 
@@ -284,7 +284,7 @@
   $('#cancelBtn').addEventListener('click', closeModal);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') { closeModal(); closeDel(); closeSaleModal(); }
+    if (e.key === 'Escape') { closeModal(); closeDel(); closeSaleModal(); closeOfferModal(); }
   });
 
   /* ============================================================
@@ -429,15 +429,15 @@
      ============================================================ */
   const productsApp = $('#productsView');
   const analyticsApp = $('#analyticsView');
+  const offersApp = $('#offersView');
 
   function switchView(name) {
-    const showAnalytics = name === 'analytics';
-    if (productsApp) productsApp.style.display = showAnalytics ? 'none' : '';
-    if (analyticsApp) {
-      analyticsApp.hidden = !showAnalytics;
-      analyticsApp.style.display = showAnalytics ? '' : 'none';
-    }
-    if (showAnalytics) loadAnalytics();
+    const views = { products: productsApp, analytics: analyticsApp, offers: offersApp };
+    Object.keys(views).forEach(k => {
+      if (views[k]) { views[k].style.display = k === name ? '' : 'none'; views[k].hidden = k !== name; }
+    });
+    if (name === 'analytics') loadAnalytics();
+    if (name === 'offers') loadOffers();
     document.body.classList.remove('view-swap');
     void document.body.offsetWidth;
     document.body.classList.add('view-swap');
@@ -614,7 +614,160 @@
   });
 
   /* ============================================================
+     PRINT RECEIPT
+     ============================================================ */
+  function printReceipt(sale) {
+    var total = (sale.quantity || 1) * (sale.price || 0);
+    var html = '<html><head><title>Receipt</title><style>' +
+      'body{font-family:monospace;font-size:12px;padding:20px;max-width:300px;margin:0 auto}' +
+      'h2{text-align:center;font-size:14px;margin:0 0 4px}' +
+      '.center{text-align:center}.line{border-top:1px dashed #000;margin:8px 0}' +
+      '.row{display:flex;justify-content:space-between;margin:3px 0}' +
+      '.total{font-weight:bold;font-size:14px;border-top:2px solid #000;padding-top:6px;margin-top:6px}' +
+      '</style></head><body>' +
+      '<div class="center"><h2>BAJWA SURGICAL</h2><p style="margin:0">Sahiwal, Pakistan</p><p style="margin:0">Ph: 0300-9697327</p></div>' +
+      '<div class="line"></div>' +
+      '<div class="row"><span>Date:</span><span>' + fmtDate(sale.date) + '</span></div>' +
+      '<div class="row"><span>Invoice #:</span><span>S-' + sale.id + '</span></div>' +
+      (sale.customer ? '<div class="row"><span>Customer:</span><span>' + esc(sale.customer) + '</span></div>' : '') +
+      (sale.phone ? '<div class="row"><span>Phone:</span><span>' + esc(sale.phone) + '</span></div>' : '') +
+      '<div class="line"></div>' +
+      '<div class="row"><b>Product</b><b>Qty x Price</b></div>' +
+      '<div class="row"><span>' + esc(sale.productName) + '</span><span>' + (sale.quantity || 1) + ' x ' + fmt(sale.price || 0) + '</span></div>' +
+      '<div class="line"></div>' +
+      '<div class="row total"><span>TOTAL</span><span>' + fmt(total) + '</span></div>' +
+      '<div class="line"></div>' +
+      '<p class="center" style="margin-top:12px;font-size:10px">Thank you for shopping with us!</p>' +
+      '</body></html>';
+    var win = window.open('', '_blank', 'width=340,height=500');
+    if (win) { win.document.write(html); win.document.close(); setTimeout(function() { win.print(); }, 500); }
+    else { toast('Allow popups to print receipt', 'err'); }
+  }
+
+  /* ============================================================
+     OFFERS & BANNERS
+     ============================================================ */
+  let offers = [];
+  const OFFERS_KEY = 'bs_offers';
+
+  function loadOffers() {
+    try { offers = JSON.parse(localStorage.getItem(OFFERS_KEY) || '[]'); } catch(e) { offers = []; }
+    renderOffers();
+  }
+
+  function saveOffers() {
+    localStorage.setItem(OFFERS_KEY, JSON.stringify(offers));
+  }
+
+  function renderOffers() {
+    var tbody2 = $('#offersTbody');
+    var empty2 = $('#offersEmpty');
+    if (!tbody2) return;
+    empty2.hidden = offers.length > 0;
+    tbody2.innerHTML = offers.sort((a,b) => (a.order||0) - (b.order||0)).map((o, i) =>
+      '<tr>' +
+      '<td><div style="width:120px;height:50px;border-radius:6px;background:' + esc(o.bg || '#145c3d') + ';color:' + esc(o.color || '#fff') + ';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;text-align:center;padding:4px">' + esc(o.title || 'Offer') + '</div></td>' +
+      '<td><p class="p-name">' + esc(o.title) + '</p></td>' +
+      '<td>' + esc(o.subtitle || '\u2014') + '</td>' +
+      '<td>' + esc(o.cta || '\u2014') + '</td>' +
+      '<td><span class="off-pill' + (o.active ? '' : ' zero') + '">' + (o.active ? 'Active' : 'Hidden') + '</span></td>' +
+      '<td>' + (o.order || 0) + '</td>' +
+      '<td class="ta-r"><div class="actions">' +
+      '<button class="icon-btn" data-offer-edit="' + i + '" title="Edit">\u270E</button>' +
+      '<button class="icon-btn del" data-offer-del="' + i + '" title="Delete">\uD83D\uDDD1</button>' +
+      '</div></td></tr>'
+    ).join('');
+    if ($('#offersSubtitle')) $('#offersSubtitle').textContent = offers.length + ' offers \u2014 stored in localStorage';
+  }
+
+  function openOfferModal(offer, idx) {
+    $('#offerModalTitle').textContent = offer ? 'Edit Offer' : 'Add Offer';
+    $('#offerId').value = idx !== undefined ? idx : '';
+    $('#offerTitle').value = offer ? offer.title : '';
+    $('#offerSubtitle').value = offer ? offer.subtitle : '';
+    $('#offerCta').value = offer ? offer.cta : 'Shop Now';
+    $('#offerLink').value = offer ? offer.link : '#';
+    $('#offerBg').value = offer ? offer.bg : '#145c3d';
+    $('#offerColor').value = offer ? offer.color : '#ffffff';
+    $('#offerOrder').value = offer ? (offer.order || 0) : 0;
+    $('#offerActive').value = offer ? (offer.active ? '1' : '0') : '1';
+    $('#offerCss').value = offer ? (offer.customCss || '') : '';
+    $('#offerModalOverlay').hidden = false;
+    $('#offerTitle').focus();
+  }
+
+  function closeOfferModal() { $('#offerModalOverlay').hidden = true; }
+
+  if ($('#addOfferBtn')) $('#addOfferBtn').addEventListener('click', () => openOfferModal(null));
+  if ($('#offerModalClose')) $('#offerModalClose').addEventListener('click', closeOfferModal);
+  if ($('#offerCancelBtn')) $('#offerCancelBtn').addEventListener('click', closeOfferModal);
+  if ($('#offerModalOverlay')) $('#offerModalOverlay').addEventListener('click', (e) => { if (e.target === $('#offerModalOverlay')) closeOfferModal(); });
+
+  if ($('#offerForm')) $('#offerForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    var idx = $('#offerId').value;
+    var payload = {
+      title: $('#offerTitle').value.trim(),
+      subtitle: $('#offerSubtitle').value.trim(),
+      cta: $('#offerCta').value.trim(),
+      link: $('#offerLink').value.trim(),
+      bg: $('#offerBg').value,
+      color: $('#offerColor').value,
+      order: +$('#offerOrder').value || 0,
+      active: $('#offerActive').value === '1',
+      customCss: $('#offerCss').value.trim(),
+    };
+    if (!payload.title) { toast('Title is required', 'err'); return; }
+    if (idx !== '') offers[+idx] = payload; else offers.push(payload);
+    saveOffers();
+    toast(idx !== '' ? 'Offer updated' : 'Offer added', 'ok');
+    closeOfferModal();
+    renderOffers();
+  });
+
+  if ($('#offersTbody')) $('#offersTbody').addEventListener('click', (e) => {
+    var editBtn = e.target.closest('[data-offer-edit]');
+    var delBtn = e.target.closest('[data-offer-del]');
+    if (editBtn) { openOfferModal(offers[+editBtn.dataset.offerEdit], +editBtn.dataset.offerEdit); }
+    if (delBtn) {
+      var i = +delBtn.dataset.offerDel;
+      if (confirm('Delete "' + offers[i].title + '"?')) { offers.splice(i, 1); saveOffers(); renderOffers(); toast('Offer deleted', 'ok'); }
+    }
+  });
+
+  if ($('#refreshOffers')) $('#refreshOffers').addEventListener('click', () => { loadOffers(); toast('Offers refreshed', 'ok'); });
+
+  /* ============================================================
+     SALE ROW — add print button
+     ============================================================ */
+  var origRenderSales = renderSales;
+  renderSales = function() {
+    origRenderSales();
+    var saleTbody = $('#saleTbody');
+    if (!saleTbody) return;
+    saleTbody.querySelectorAll('tr').forEach((tr, idx) => {
+      var q = $('#saleSearch').value.trim().toLowerCase();
+      var f = $('#saleFilter').value;
+      var filtered = (analytics.sales || []).filter((s) => {
+        if (!saleInRange(s, f)) return false;
+        if (q && !(s.productName + ' ' + (s.customer || '') + ' ' + (s.phone || '')).toLowerCase().includes(q)) return false;
+        return true;
+      }).sort((a, b) => new Date(b.date) - new Date(a.date));
+      var sale = filtered[idx];
+      if (sale && tr.querySelector('.actions')) {
+        var printBtn = document.createElement('button');
+        printBtn.className = 'icon-btn';
+        printBtn.title = 'Print receipt';
+        printBtn.innerHTML = '\uD83D\uDDA8';
+        printBtn.addEventListener('click', () => printReceipt(sale));
+        tr.querySelector('.actions').prepend(printBtn);
+      }
+    });
+  };
+
+  /* ============================================================
      INIT
      ============================================================ */
   loadImages().then(load).then(fetchAnalytics);
+  loadOffers();
 })();

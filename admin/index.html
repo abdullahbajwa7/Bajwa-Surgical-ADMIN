@@ -26,6 +26,10 @@
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         Products
       </button>
+      <button class="nav-item" data-view="offers">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        Offers &amp; Banners
+      </button>
       <button class="nav-item" data-view="analytics">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
         Sales &amp; Analytics
@@ -109,6 +113,45 @@
             <tbody id="tbody"></tbody>
           </table>
           <div class="empty" id="empty" hidden>No products match your filter.</div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ==================== OFFERS & BANNERS VIEW ==================== -->
+    <div id="offersView" hidden>
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1>Offers &amp; Banners</h1>
+          <p id="offersSubtitle">Manage slider offers and promo banners</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn ghost" id="refreshOffers">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 11A8 8 0 006.3 6.3L4 8.6M4 4v4.6h4.6"/><path d="M4 13a8 8 0 0013.7 4.7L20 15.4M20 20v-4.6h-4.6"/></svg>
+            Refresh
+          </button>
+          <button class="btn primary" id="addOfferBtn">
+            <span class="plus">+</span> Add Offer
+          </button>
+        </div>
+      </header>
+
+      <section class="panel">
+        <div class="table-wrap">
+          <table class="prod-table">
+            <thead>
+              <tr>
+                <th>Preview</th>
+                <th>Title</th>
+                <th>Subtitle</th>
+                <th>CTA Text</th>
+                <th>Status</th>
+                <th>Order</th>
+                <th class="ta-r">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="offersTbody"></tbody>
+          </table>
+          <div class="empty" id="offersEmpty" hidden>No offers created yet. Add your first slider offer!</div>
         </div>
       </section>
     </div>
@@ -284,6 +327,39 @@
 <datalist id="catList"></datalist>
 <datalist id="productList"></datalist>
 <div class="toasts" id="toasts"></div>
+
+<!-- ==================== OFFER MODAL ==================== -->
+<div class="modal-overlay" id="offerModalOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <h2 id="offerModalTitle">Add Offer</h2>
+      <button class="modal-close" id="offerModalClose" aria-label="Close">&times;</button>
+    </div>
+    <form id="offerForm" novalidate>
+      <input type="hidden" id="offerId">
+      <div class="form-grid">
+        <label class="field span2"><span>Title *</span><input type="text" id="offerTitle" required placeholder="e.g. Summer Sale"></label>
+        <label class="field"><span>Subtitle</span><input type="text" id="offerSubtitle" placeholder="e.g. On all medical devices"></label>
+        <label class="field"><span>CTA Button Text</span><input type="text" id="offerCta" placeholder="e.g. Shop Now"></label>
+        <label class="field"><span>CTA Link</span><input type="text" id="offerLink" placeholder="e.g. /bestsellers"></label>
+        <label class="field"><span>Background Color</span><input type="color" id="offerBg" value="#145c3d"></label>
+        <label class="field"><span>Text Color</span><input type="color" id="offerColor" value="#ffffff"></label>
+        <label class="field"><span>Display Order</span><input type="number" id="offerOrder" min="0" value="0"></label>
+        <label class="field"><span>Status</span>
+          <select id="offerActive"><option value="1">Active</option><option value="0">Hidden</option></select>
+        </label>
+        <label class="field span2"><span>Custom CSS</span><textarea id="offerCss" rows="2" placeholder="e.g. font-size: 48px"></textarea></label>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn ghost" id="offerCancelBtn">Cancel</button>
+        <button type="submit" class="btn primary">Save Offer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ==================== RECEIPT PRINT ==================== -->
+<div id="receiptPrint" style="display:none"></div>
 
 <script src="/admin/admin.js"></script>
 </body>

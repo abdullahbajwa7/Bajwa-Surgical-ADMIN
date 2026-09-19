@@ -27,10 +27,18 @@ function readBody(req) {
   });
 }
 
-module.exports = async (req, res) => {
-  if (req.method === 'OPTIONS') { res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' }); return res.end(); }
+function getId(req) {
+  if (req.query && req.query.id) return parseInt(req.query.id);
+  const url = req.url || '';
+  const parts = url.split('/').filter(Boolean);
+  const last = parts[parts.length - 1];
+  return parseInt(last);
+}
 
-  const id = parseInt(req.query.id || req.url.split('/').pop());
+module.exports = async (req, res) => {
+  if (req.method === 'OPTIONS') { res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' }); return res.end(); }
+
+  const id = getId(req);
   if (isNaN(id)) return jsonRes(res, 400, { error: 'Invalid ID' });
 
   const db = getProducts();
