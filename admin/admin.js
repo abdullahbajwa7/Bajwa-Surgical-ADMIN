@@ -40,6 +40,8 @@
      API HELPERS
      ============================================================ */
   async function apiFetch(url, opts) {
+    opts = opts || {};
+    opts.credentials = 'same-origin';
     const res = await fetch(url, opts);
     if (res.status === 401) {
       location.href = '/admin/login.html';
@@ -106,7 +108,7 @@
 
   async function fetchAnalytics() {
     try {
-      const res = await apiFetch(API + '/api/analytics');
+      const res = await fetch(API + '/api/analytics', { credentials: 'same-origin' });
       if (res.ok) analytics = await res.json();
     } catch (e) { /* keep last */ }
   }
