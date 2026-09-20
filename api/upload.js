@@ -15,7 +15,8 @@ module.exports = async (req, res) => {
         return jsonRes(res, 400, { error: 'Invalid image data' });
       }
       const ext = dataUrl.split(';')[0].split('/')[1] || 'png';
-      const safeName = (data.filename || 'upload').replace(/[^a-zA-Z0-9._-]/g, '_') + '.' + ext;
+      const baseName = (data.filename || 'upload').replace(/\.[^.]+$/, '');
+      const safeName = baseName.replace(/[^a-zA-Z0-9._-]/g, '_') + '.' + ext;
       return jsonRes(res, 200, {
         ok: true,
         filename: safeName,
