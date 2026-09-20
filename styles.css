@@ -644,3 +644,34 @@ input { font-family: inherit; }
   .order-modal { max-height: 100vh; border-radius: 0; }
   .form-row { flex-direction: column; gap: 12px; }
 }
+
+/* Track Order Button */
+.track-order-btn {
+  background: none; border: 2px solid var(--green); color: var(--green);
+  width: 40px; height: 40px; border-radius: 10px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s, color .2s;
+}
+.track-order-btn:hover { background: var(--green); color: #fff; }
+
+/* Track Results */
+.track-results { max-height: 60vh; overflow-y: auto; padding: 4px 0; }
+.track-card {
+  background: var(--bg-soft); border-radius: 12px; padding: 16px;
+  margin-bottom: 12px; border: 1px solid var(--line);
+}
+.track-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.track-id { font-weight: 700; font-size: 13px; color: var(--green); }
+.track-date { font-size: 12px; color: var(--ink-soft); }
+.track-items { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.track-item {
+  background: #fff; border: 1px solid var(--line); border-radius: 8px;
+  padding: 4px 10px; font-size: 12px; font-weight: 500;
+}
+[data-theme="dark"] .track-item { background: #2a2a2a; }
+.track-card-footer { display: flex; justify-content: space-between; align-items: center; }
+.track-total { font-weight: 800; font-size: 15px; color: var(--green); }
+.track-addr { font-size: 12px; color: var(--ink-soft); margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); }
+.track-note { font-size: 11px; color: #888; font-style: italic; margin-top: 4px; }
+.track-empty { text-align: center; padding: 40px 20px; color: var(--ink-soft); }
+.track-step { padding: 0 8px; }

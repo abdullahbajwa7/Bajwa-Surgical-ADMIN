@@ -1,4 +1,4 @@
-const { createOrder, getOrders, updateOrderStatus } = require('../lib/supabase');
+const { createOrder, getOrders, getOrdersByPhone, updateOrderStatus } = require('../lib/supabase');
 const { isAdmin, jsonRes } = require('../lib/auth');
 
 function readBody(req) {
@@ -22,6 +22,12 @@ module.exports = async (req, res) => {
 
   if (req.method === 'GET') {
     try {
+      const url = new URL(req.url, 'http://' + req.headers.host);
+      const phone = url.searchParams.get('phone');
+      if (phone) {
+        const orders = await getOrdersByPhone(phone);
+        return jsonRes(res, 200, orders);
+      }
       const orders = await getOrders();
       return jsonRes(res, 200, orders);
     } catch (err) {

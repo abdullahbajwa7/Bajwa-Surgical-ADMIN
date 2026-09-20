@@ -347,6 +347,8 @@
       var data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed');
 
+      localStorage.setItem('orderPhone', payload.phone);
+
       var itemsList = items.map(function (it) { return it.name + ' x' + it.qty; }).join(', ');
       document.getElementById('orderConfirmId').innerHTML =
         '<strong>Order ID:</strong> ' + (data.id || '').substring(0, 8) + '<br>' +
@@ -499,4 +501,75 @@
       if (h !== state.hash) { state.products = data.products; state.currency = data.currency || '\u20a8'; state.hash = h; renderSections(); toast('Catalog updated'); }
     }).catch(function () {});
   }, 30000);
+
+  /* ============================================================
+     ORDER TRACKING
+     ============================================================ */
+  var trackOverlay = document.getElementById('trackModalOverlay');
+  var trackStep1 = document.getElementById('trackStep1');
+  var trackStep2 = document.getElementById('trackStep2');
+  var trackPhone = document.getElementById('trackPhone');
+  var trackResults = document.getElementById('trackResults');
+
+  function openTrackModal() {
+    trackOverlay.hidden = false;
+    trackStep1.hidden = false;
+    trackStep2.hidden = true;
+    trackPhone.value = localStorage.getItem('orderPhone') || '';
+    document.body.classList.add('no-scroll');
+    if (trackPhone.value) trackPhone.focus();
+  }
+
+  function closeTrackModal() {
+    trackOverlay.hidden = true;
+    document.body.classList.remove('no-scroll');
+  }
+
+  var trackBtn = document.getElementById('trackOrderBtn');
+  if (trackBtn) trackBtn.addEventListener('click', openTrackModal);
+
+  var trackCloseBtn = document.getElementById('trackModalClose');
+  if (trackCloseBtn) trackCloseBtn.addEventListener('click', closeTrackModal);
+  if (trackOverlay) trackOverlay.addEventListener('click', function (e) { if (e.target === trackOverlay) closeTrackModal(); });
+
+  var trackSearchBtn = document.getElementById('trackSearchBtn');
+  if (trackSearchBtn) trackSearchBtn.addEventListener('click', function () {
+    var phone = trackPhone.value.trim().replace(/[^0-9]/g, '');
+    if (!phone || phone.length < 10) { toast('Please enter a valid phone number'); return; }
+    trackSearchBtn.disabled = true;
+    trackSearchBtn.textContent = 'Searching...';
+    fetch('/api/orders?phone=' + encodeURIComponent(phone))
+      .then(function (r) { return r.json(); })
+      .then(function (orders) {
+        trackStep1.hidden = true;
+        trackStep2.hidden = false;
+        if (!orders || !orders.length) {
+          trackResults.innerHTML = '<div class="track-empty"><p>No orders found for this phone number.</p></div>';
+          return;
+        }
+        var html = orders.map(function (o) {
+          var items = Array.isArray(o.items) ? o.items : [];
+          var itemsHtml = items.map(function (it) { return '<span class="track-item">' + esc(it.name) + ' x' + it.qty + '</span>'; }).join('');
+          var date = o.created_at ? new Date(o.created_at).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+          var statusClass = o.status === 'completed' ? 'status-delivered' : 'status-pending';
+          var orderId = (o.id || '').substring(0, 8);
+          return '<div class="track-card">' +
+            '<div class="track-card-header"><span class="track-id">#' + orderId + '</span><span class="track-date">' + date + '</span></div>' +
+            '<div class="track-items">' + itemsHtml + '</div>' +
+            '<div class="track-card-footer"><span class="order-status ' + statusClass + '">' + esc(o.status) + '</span><span class="track-total">' + fmt(o.total) + '</span></div>' +
+            (o.address ? '<div class="track-addr">' + esc(o.address) + '</div>' : '') +
+            (o.note ? '<div class="track-note">Note: ' + esc(o.note) + '</div>' : '') +
+            '</div>';
+        }).join('');
+        trackResults.innerHTML = html;
+      })
+      .catch(function () { toast('Failed to fetch orders'); })
+      .then(function () { trackSearchBtn.disabled = false; trackSearchBtn.textContent = 'Find My Orders'; });
+  });
+
+  var trackBackBtn = document.getElementById('trackBackBtn');
+  if (trackBackBtn) trackBackBtn.addEventListener('click', function () {
+    trackStep1.hidden = false;
+    trackStep2.hidden = true;
+  });
 })();
