@@ -1,4 +1,4 @@
-const { getProducts, saveProducts } = require('../../lib/store');
+const { getProductsSync, saveProducts } = require('../../lib/store');
 const { isAdmin, jsonRes } = require('../../lib/auth');
 
 function sanitize(input, id) {
@@ -29,10 +29,8 @@ function readBody(req) {
 
 function getId(req) {
   if (req.query && req.query.id) return parseInt(req.query.id);
-  const url = req.url || '';
-  const parts = url.split('/').filter(Boolean);
-  const last = parts[parts.length - 1];
-  return parseInt(last);
+  const parts = (req.url || '').split('/').filter(Boolean);
+  return parseInt(parts[parts.length - 1]);
 }
 
 module.exports = async (req, res) => {
@@ -41,7 +39,7 @@ module.exports = async (req, res) => {
   const id = getId(req);
   if (isNaN(id)) return jsonRes(res, 400, { error: 'Invalid ID' });
 
-  const db = getProducts();
+  const db = getProductsSync();
   const idx = db.products.findIndex(x => x.id === id);
   if (idx === -1) return jsonRes(res, 404, { error: 'Product not found' });
 
@@ -56,7 +54,7 @@ module.exports = async (req, res) => {
       const product = sanitize({ ...db.products[idx], ...body }, id);
       if (!product.name) return jsonRes(res, 400, { error: 'Name is required' });
       db.products[idx] = product;
-      saveProducts(db);
+      await saveProducts(db);
       return jsonRes(res, 200, product);
     } catch (err) { return jsonRes(res, 400, { error: err.message }); }
   }
@@ -64,7 +62,7 @@ module.exports = async (req, res) => {
   if (req.method === 'DELETE') {
     if (!isAdmin(req)) return jsonRes(res, 401, { error: 'Admin login required' });
     db.products.splice(idx, 1);
-    saveProducts(db);
+    await saveProducts(db);
     return jsonRes(res, 200, { ok: true, id });
   }
 
