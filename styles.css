@@ -254,9 +254,17 @@ input { font-family: inherit; }
 .prices .sale { color: var(--red); font-weight: 800; font-size: 16px; }
 .prices span { font-weight: 800; color: var(--ink); font-size: 16px; }
 .stars { color: var(--amber); font-size: 13px; letter-spacing: 2px; margin-bottom: 7px; text-shadow: 0 1px 0 rgba(232,163,61,.2); }
-.add-cart-btn { margin-top: 12px; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 7px; background: var(--green); color: #fff; border: 0; font-weight: 700; font-size: 13.5px; padding: 11px 0; border-radius: 11px; transition: background .2s, transform .15s, box-shadow .2s; }
+.add-cart-btn { margin-top: 12px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; background: var(--green); color: #fff; border: 0; font-weight: 700; font-size: 13.5px; padding: 11px 0; border-radius: 11px; transition: background .2s, transform .15s, box-shadow .2s; cursor: pointer; flex: 1; }
 .add-cart-btn:hover { background: var(--green-dark); transform: translateY(-1px); box-shadow: 0 8px 18px rgba(31,122,86,.3); }
 .add-cart-btn:active { transform: scale(.97); }
+.card-btns { display: flex; gap: 8px; margin-top: 12px; }
+.buy-now-btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; background: #fff; color: var(--green-dark); border: 2px solid var(--green); font-weight: 700; font-size: 13.5px; padding: 10px 0; border-radius: 11px; cursor: pointer; transition: all .2s; }
+.buy-now-btn:hover { background: var(--green); color: #fff; transform: translateY(-1px); box-shadow: 0 8px 18px rgba(31,122,86,.3); }
+.qv-buy { margin-left: 10px; padding: 14px 28px; font-size: 14.5px; }
+.order-form { display: flex; flex-direction: column; gap: 8px; }
+.order-form input, .order-form textarea { width: 100%; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px; font-size: 13.5px; font-family: inherit; outline: none; transition: border-color .2s; }
+.order-form input:focus, .order-form textarea:focus { border-color: var(--green); }
+.btn-block { width: 100%; text-align: center; }
 .card-quick { position: absolute; bottom: 14px; left: 50%; transform: translate(-50%, 12px); z-index: 3; background: rgba(255,255,255,.94); border: 0; color: var(--green-dark); font-weight: 700; font-size: 12px; padding: 8px 18px; border-radius: 999px; box-shadow: var(--shadow-md); opacity: 0; transition: all .25s var(--ease); }
 .product-card:hover .card-quick { opacity: 1; transform: translate(-50%, 0); }
 .add-cart-btn, .card-quick { cursor: pointer; }

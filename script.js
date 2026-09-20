@@ -1,7 +1,6 @@
 (function () {
   'use strict';
 
-  /* Admin Panel — //#adminpanal */
   var ADMIN_PANEL_URL = '/admin';
   if (window.location.hash === '#adminpanal') {
     var admHmr = document.createElement('div');
@@ -13,7 +12,7 @@
     admHmr.appendChild(admFrm);
     document.body.appendChild(admHmr);
     document.documentElement.style.overflow = 'hidden';
-    try { document.title = 'BAJWA SERJICAL — Admin Panel'; } catch (e) {}
+    try { document.title = 'BAJWA SERJICAL \u2014 Admin Panel'; } catch (e) {}
     window.addEventListener('hashchange', function () { window.location.reload(); });
     return;
   }
@@ -22,30 +21,19 @@
   var FALLBACK = {
     currency: 'Rs',
     products: [
-      { id: 1, name: 'Bliss Reuseable Urine Bag for Male and Female Patients', category: 'Urine Bags', price: 2799, regularPrice: 3500, rating: 4.5, badge: '-20%', image: 'images/prod-urine-bag.jpg', desc: 'Reusable, leak-proof urine bag for hospital and home care.', tags: ['best', 'bestseller'] },
-      { id: 2, name: 'Blueidea BLD-326 Handheld Fascial Massager Gun Pro', category: 'Massager', price: 4499, regularPrice: 5000, rating: 4.5, badge: '-10%', image: 'images/prod-massager-gun.jpg', desc: 'Deep tissue massage gun for recovery and pain relief.', tags: ['best', 'bestseller'] },
-      { id: 3, name: 'Sinocare iCan i3 CGM', category: 'CGM', price: 12900, priceMax: 45600, rating: 5, image: 'images/prod-cgm.png', desc: 'Continuous Glucose Monitoring with free smartphone App.', tags: ['best', 'bestseller'] },
-      { id: 4, name: 'Sinocare UG Uric Acid & Glucose Monitor', category: 'Uric Acid Test Meter', price: 4999, priceMax: 5699, rating: 5, image: 'images/prod-uric-acid.webp', desc: '2-in-1 dual meter for uric acid and blood glucose.', tags: ['best', 'bestseller'] }
+      { id: 1, name: 'Bliss Reuseable Urine Bag', category: 'Urine Bags', price: 2799, regularPrice: 3500, rating: 4.5, badge: '-20%', image: 'images/prod-urine-bag.jpg', desc: 'Reusable, leak-proof urine bag.', tags: ['best', 'bestseller'] },
+      { id: 2, name: 'Blueidea BLD-326 Massager Gun', category: 'Massager', price: 4499, regularPrice: 5000, rating: 4.5, badge: '-10%', image: 'images/prod-massager-gun.jpg', desc: 'Deep tissue massage gun.', tags: ['best', 'bestseller'] },
+      { id: 3, name: 'Sinocare iCan i3 CGM', category: 'CGM', price: 12900, priceMax: 45600, rating: 5, image: 'images/prod-cgm.png', desc: 'Continuous Glucose Monitoring.', tags: ['best', 'bestseller'] },
+      { id: 4, name: 'Sinocare UG Uric Acid Monitor', category: 'Uric Acid Test Meter', price: 4999, priceMax: 5699, rating: 5, image: 'images/prod-uric-acid.webp', desc: '2-in-1 dual meter.', tags: ['best', 'bestseller'] }
     ]
   };
 
   var state = { currency: 'Rs', products: [], loaded: false, hash: '', storeNameLabel: 'Bajwa Surgical' };
 
-  /* Visitor counter — if admin API is up, count this visit */
   try {
-    fetch('/api/analytics', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'visitor' }),
-      mode: 'cors'
-    });
-    fetch('/api/analytics', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'pageView', page: window.location.pathname + window.location.hash }),
-      mode: 'cors'
-    });
-  } catch (e) { /* offline — ignore */ }
+    fetch('/api/analytics', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'visitor' }), mode: 'cors' });
+    fetch('/api/analytics', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'pageView', page: window.location.pathname + window.location.hash }), mode: 'cors' });
+  } catch (e) {}
 
   function fmt(n) { return state.currency + ' ' + Number(n).toLocaleString('en-PK'); }
   function rangeText(p) { return p.priceMax && p.priceMax > p.price ? fmt(p.price) + ' - ' + fmt(p.priceMax) : fmt(p.price); }
@@ -100,7 +88,10 @@
       '<div class="prod-info">' +
         '<h3>' + esc(p.name) + '</h3>' + starsHTML +
         '<p class="prices">' + priceHTML + '</p>' +
-        '<button class="add-cart-btn" data-act="add" data-id="' + p.id + '">+ Add to Cart</button>' +
+        '<div class="card-btns">' +
+        '<button class="add-cart-btn" data-act="add" data-id="' + p.id + '">+ Cart</button>' +
+        '<button class="buy-now-btn" data-act="buy" data-id="' + p.id + '">Buy Now</button>' +
+        '</div>' +
       '</div></article>';
   }
 
@@ -168,7 +159,7 @@
     if (sub) a.addEventListener('click', function (e) { if (window.innerWidth <= 900) { e.preventDefault(); li.classList.toggle('open'); } });
   });
 
-  /* Cart */
+  /* ============ CART with localStorage ============ */
   var cart = {};
   var badgeEl = document.getElementById('cartBadge');
   var drawer = document.getElementById('cartDrawer');
@@ -178,6 +169,18 @@
   var cartFooter = document.getElementById('cartFooter');
   var cartSubtotal = document.getElementById('cartSubtotal');
   var waOrder = document.getElementById('waOrder');
+  var orderForm = document.getElementById('orderForm');
+  var orderStatus = document.getElementById('orderStatus');
+
+  function saveCart() {
+    try { localStorage.setItem('bajwa_cart', JSON.stringify(cart)); } catch (e) {}
+  }
+  function loadCart() {
+    try {
+      var saved = localStorage.getItem('bajwa_cart');
+      if (saved) cart = JSON.parse(saved);
+    } catch (e) { cart = {}; }
+  }
 
   function cartCount() { return Object.values(cart).reduce(function (s, x) { return s + x.qty; }, 0); }
   function cartTotal() { return Object.values(cart).reduce(function (s, x) { return s + x.qty * x.price; }, 0); }
@@ -204,15 +207,17 @@
     cartSubtotal.textContent = fmt(total);
     var lines = Object.keys(cart).map(function (id) { var l = cart[id]; return '* ' + l.name + ' - ' + fmt(l.price) + ' x ' + l.qty; }).join('\n');
     waOrder.href = 'https://wa.me/923009697327?text=' + encodeURIComponent('Hello, I want to order:\n\n' + lines + '\n\nTotal: ' + fmt(total));
+    saveCart();
   }
 
-  function addToCart(id) {
+  function addToCart(id, buyNow) {
     var p = state.products.find(function (x) { return x.id === +id; });
     if (!p) return;
     if (cart[id]) cart[id].qty++;
     else cart[id] = { qty: 1, name: p.name, price: p.price, image: p.image };
     renderCart();
     if (!badgeEl.hidden) { badgeEl.style.transform = 'scale(1.4)'; setTimeout(function () { badgeEl.style.transform = 'scale(1)'; }, 180); }
+    if (buyNow) openCart();
   }
 
   cartItems.addEventListener('click', function (e) {
@@ -232,6 +237,51 @@
   overlay.addEventListener('click', closeCart);
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeCart(); closeQV(); } });
 
+  /* ============ ORDER FORM ============ */
+  if (orderForm) {
+    orderForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var name = document.getElementById('orderName').value.trim();
+      var phone = document.getElementById('orderPhone').value.trim();
+      var address = document.getElementById('orderAddress').value.trim();
+      if (!name || !phone || !address) return toast('Please fill all fields');
+      if (cartCount() === 0) return toast('Cart is empty');
+
+      var items = Object.keys(cart).map(function (id) {
+        return { id: +id, name: cart[id].name, price: cart[id].price, qty: cart[id].qty };
+      });
+      var total = cartTotal();
+
+      var btn = document.getElementById('placeOrderBtn');
+      btn.disabled = true;
+      btn.textContent = 'Placing Order...';
+      orderStatus.style.display = 'none';
+
+      try {
+        var res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name, phone: phone, address: address, items: items, total: total })
+        });
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        orderStatus.style.display = 'block';
+        orderStatus.style.color = '#1a7a52';
+        orderStatus.textContent = 'Order placed successfully! We will contact you soon. Order ID: ' + (data.id || '').substring(0, 8);
+        cart = {};
+        saveCart();
+        renderCart();
+        orderForm.reset();
+      } catch (err) {
+        orderStatus.style.display = 'block';
+        orderStatus.style.color = '#dc3545';
+        orderStatus.textContent = 'Error: ' + err.message;
+      }
+      btn.disabled = false;
+      btn.textContent = 'Place Order';
+    });
+  }
+
   /* Quick View */
   var qvOverlay = document.getElementById('qvOverlay');
   var qvBody = document.getElementById('qvBody');
@@ -249,11 +299,11 @@
       '<p class="desc">' + esc(p.desc || 'Premium quality product from Bajwa Surgical.') + '</p>' +
       '<div class="qv-prices">' + priceHTML + '</div>' +
       '<div class="qv-btns"><button class="btn-green" data-act="add" data-id="' + p.id + '">+ Add to Cart</button>' +
-      '<a class="qv-wa" target="_blank" rel="noopener" href="https://wa.me/923009697327?text=' + encodeURIComponent('Hello, I want to order: ' + p.name) + '">WhatsApp</a></div>' +
+      '<button class="buy-now-btn qv-buy" data-act="buy" data-id="' + p.id + '">Buy Now</button>' +
+      '</div>' +
       '<div class="qv-tags"><span>100% Original</span><span>Money Back Guarantee</span><span>Fast Delivery</span></div></div>';
     qvOverlay.hidden = false;
     document.body.classList.add('no-scroll');
-    /* Track product view */
     try {
       fetch('/api/analytics', {
         method: 'POST',
@@ -261,7 +311,7 @@
         body: JSON.stringify({ type: 'productView', productId: p.id, productName: p.name }),
         mode: 'cors'
       });
-    } catch (e) { /* ignore */ }
+    } catch (e) {}
   }
   function closeQV() { qvOverlay.hidden = true; document.body.classList.remove('no-scroll'); }
   document.getElementById('qvClose').addEventListener('click', closeQV);
@@ -271,7 +321,8 @@
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-act]');
     if (!t) return;
-    if (t.dataset.act === 'add') { e.preventDefault(); addToCart(t.dataset.id); toast('Added to cart'); }
+    if (t.dataset.act === 'add') { e.preventDefault(); addToCart(t.dataset.id, false); toast('Added to cart'); }
+    else if (t.dataset.act === 'buy') { e.preventDefault(); addToCart(t.dataset.id, true); toast('Added to cart'); }
     else if (t.dataset.act === 'quick') { e.preventDefault(); openQuickView(t.dataset.id); }
   });
 
@@ -331,7 +382,7 @@
     setTimeout(function () { el.style.transition = 'all .3s'; el.style.opacity = '0'; el.style.transform = 'translateY(10px)'; setTimeout(function () { el.remove(); }, 320); }, 1800);
   }
 
-  /* Force-clear overlays (safety net) */
+  /* Force-clear overlays */
   function forceClearOverlays() {
     drawer.classList.remove('open');
     overlay.classList.remove('open');
@@ -347,6 +398,7 @@
     el.innerHTML = skeleton(el.classList.contains('cols-4') ? 8 : (el.classList.contains('cols-5') ? 10 : 6), el.dataset.render);
   });
 
+  loadCart();
   loadData().then(function () { renderSections(); renderCart(); });
 
   setInterval(function () {

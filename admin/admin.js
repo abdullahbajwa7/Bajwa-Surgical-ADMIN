@@ -430,14 +430,16 @@
   const productsApp = $('#productsView');
   const analyticsApp = $('#analyticsView');
   const offersApp = $('#offersView');
+  const ordersApp = $('#ordersView');
 
   function switchView(name) {
-    const views = { products: productsApp, analytics: analyticsApp, offers: offersApp };
+    const views = { products: productsApp, analytics: analyticsApp, offers: offersApp, orders: ordersApp };
     Object.keys(views).forEach(k => {
       if (views[k]) { views[k].style.display = k === name ? '' : 'none'; views[k].hidden = k !== name; }
     });
     if (name === 'analytics') loadAnalytics();
     if (name === 'offers') loadOffers();
+    if (name === 'orders') loadOrders();
     document.body.classList.remove('view-swap');
     void document.body.offsetWidth;
     document.body.classList.add('view-swap');
@@ -764,6 +766,141 @@
       }
     });
   };
+
+  /* ============================================================
+     ORDERS
+     ============================================================ */
+  let ordersData = [];
+
+  async function loadOrders() {
+    try {
+      const res = await apiFetch(API + '/api/orders');
+      if (!res.ok) throw new Error('Failed');
+      ordersData = await res.json();
+      renderOrders();
+    } catch (e) {
+      console.error('orders load', e);
+      $('#ordersEmpty').hidden = false;
+      $('#ordersEmpty').textContent = 'Failed to load orders. Check Supabase connection.';
+    }
+  }
+
+  function renderOrders() {
+    const tbody = $('#ordersTbody');
+    const empty = $('#ordersEmpty');
+    const countEl = $('#orderCount');
+    const search = ($('#orderSearch') || {}).value || '';
+    const statusFilter = ($('#orderStatusFilter') || {}).value || '';
+    const q = search.trim().toLowerCase();
+
+    let filtered = ordersData.filter(o => {
+      if (statusFilter && o.status !== statusFilter) return false;
+      if (q && !(o.name + ' ' + o.phone + ' ' + o.address).toLowerCase().includes(q)) return false;
+      return true;
+    });
+
+    countEl.textContent = filtered.length + ' order' + (filtered.length !== 1 ? 's' : '');
+    tbody.innerHTML = '';
+
+    if (filtered.length === 0) {
+      empty.hidden = false;
+      return;
+    }
+    empty.hidden = true;
+
+    filtered.forEach(o => {
+      const tr = document.createElement('tr');
+      const items = Array.isArray(o.items) ? o.items : [];
+      const itemsText = items.map(i => i.name + ' x' + i.qty).join(', ');
+      const date = o.created_at ? new Date(o.created_at).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+      const statusClass = o.status === 'accepted' ? 'status-accepted' : o.status === 'rejected' ? 'status-rejected' : o.status === 'shipped' ? 'status-shipped' : o.status === 'delivered' ? 'status-delivered' : 'status-pending';
+      tr.innerHTML = '<td><strong>' + esc(o.name) + '</strong></td>' +
+        '<td>' + esc(o.phone) + '</td>' +
+        '<td style="max-width:180px;font-size:12px">' + esc(o.address) + '</td>' +
+        '<td style="max-width:200px;font-size:12px">' + esc(itemsText) + '</td>' +
+        '<td><strong>\u20a8 ' + Number(o.total).toLocaleString('en-PK') + '</strong></td>' +
+        '<td><span class="order-status ' + statusClass + '">' + esc(o.status) + '</span></td>' +
+        '<td style="font-size:12px">' + date + '</td>' +
+        '<td class="ta-r actions"></td>';
+
+      const actions = tr.querySelector('.actions');
+      if (o.status === 'pending') {
+        const acceptBtn = document.createElement('button');
+        acceptBtn.className = 'icon-btn';
+        acceptBtn.title = 'Accept';
+        acceptBtn.style.color = '#16a34a';
+        acceptBtn.textContent = '\u2714';
+        acceptBtn.addEventListener('click', () => updateOrder(o.id, 'accepted'));
+        actions.appendChild(acceptBtn);
+
+        const rejectBtn = document.createElement('button');
+        rejectBtn.className = 'icon-btn';
+        rejectBtn.title = 'Reject';
+        rejectBtn.style.color = '#dc2626';
+        rejectBtn.textContent = '\u2716';
+        rejectBtn.addEventListener('click', () => updateOrder(o.id, 'rejected'));
+        actions.appendChild(rejectBtn);
+      }
+      if (o.status !== 'delivered' && o.status !== 'rejected') {
+        const shipBtn = document.createElement('button');
+        shipBtn.className = 'icon-btn';
+        shipBtn.title = 'Mark shipped';
+        shipBtn.style.color = '#2563eb';
+        shipBtn.textContent = '\uD83D\uDCE6';
+        shipBtn.addEventListener('click', () => updateOrder(o.id, 'shipped'));
+        actions.appendChild(shipBtn);
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'icon-btn';
+        delBtn.title = 'Mark delivered';
+        delBtn.style.color = '#16a34a';
+        delBtn.textContent = '\u2714\uFE0F';
+        delBtn.addEventListener('click', () => updateOrder(o.id, 'delivered'));
+        actions.appendChild(delBtn);
+      }
+      tbody.appendChild(tr);
+    });
+
+    renderOrdersStats();
+  }
+
+  function renderOrdersStats() {
+    const el = $('#ordersStats');
+    if (!el) return;
+    const total = ordersData.length;
+    const pending = ordersData.filter(o => o.status === 'pending').length;
+    const accepted = ordersData.filter(o => o.status === 'accepted').length;
+    const shipped = ordersData.filter(o => o.status === 'shipped').length;
+    const delivered = ordersData.filter(o => o.status === 'delivered').length;
+    const revenue = ordersData.filter(o => o.status !== 'rejected').reduce((s, o) => s + Number(o.total || 0), 0);
+    el.innerHTML = '<div class="stat-card"><span class="stat-val">' + total + '</span><span class="stat-lbl">Total</span></div>' +
+      '<div class="stat-card"><span class="stat-val">' + pending + '</span><span class="stat-lbl">Pending</span></div>' +
+      '<div class="stat-card"><span class="stat-val">' + accepted + '</span><span class="stat-lbl">Accepted</span></div>' +
+      '<div class="stat-card"><span class="stat-val">' + shipped + '</span><span class="stat-lbl">Shipped</span></div>' +
+      '<div class="stat-card"><span class="stat-val">' + delivered + '</span><span class="stat-lbl">Delivered</span></div>' +
+      '<div class="stat-card"><span class="stat-val">\u20a8 ' + revenue.toLocaleString('en-PK') + '</span><span class="stat-lbl">Revenue</span></div>';
+  }
+
+  async function updateOrder(id, status) {
+    try {
+      const res = await apiFetch(API + '/api/orders', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status })
+      });
+      if (!res.ok) throw new Error('Failed');
+      toast('Order ' + status, 'ok');
+      loadOrders();
+    } catch (e) {
+      toast('Failed to update order', 'err');
+    }
+  }
+
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+  if ($('#refreshOrders')) $('#refreshOrders').addEventListener('click', loadOrders);
+  if ($('#orderSearch')) $('#orderSearch').addEventListener('input', renderOrders);
+  if ($('#orderStatusFilter')) $('#orderStatusFilter').addEventListener('change', renderOrders);
 
   /* ============================================================
      INIT

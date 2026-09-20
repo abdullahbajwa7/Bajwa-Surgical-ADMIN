@@ -457,7 +457,16 @@
   </div>
   <div class="cart-footer" id="cartFooter" hidden>
     <p class="cart-subtotal">Subtotal: <strong id="cartSubtotal">Rs 0</strong></p>
-    <a href="#" id="waOrder" target="_blank" rel="noopener" class="btn-green btn-block">Order via WhatsApp</a>
+    <div id="cartFormWrap">
+      <form id="orderForm" class="order-form">
+        <input type="text" id="orderName" placeholder="Your Name" required>
+        <input type="tel" id="orderPhone" placeholder="Phone Number" required>
+        <textarea id="orderAddress" placeholder="Shipping Address" rows="2" required></textarea>
+        <button type="submit" class="btn-green btn-block" id="placeOrderBtn">Place Order</button>
+      </form>
+      <p id="orderStatus" style="display:none;text-align:center;padding:12px;font-weight:600;"></p>
+    </div>
+    <a href="#" id="waOrder" target="_blank" rel="noopener" class="btn-outline btn-block" style="margin-top:8px;font-size:13px;">Order via WhatsApp</a>
   </div>
 </aside>
 
