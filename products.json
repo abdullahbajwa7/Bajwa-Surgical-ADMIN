@@ -411,7 +411,9 @@
       "badge": "-13%",
       "image": "images/prod-cgm.png",
       "desc": "Professional dual head stethoscope with high acoustic clarity. Soft ear tips and durable chestpiece for everyday clinical use.",
-      "tags": ["latest"]
+      "tags": [
+        "latest"
+      ]
     },
     {
       "id": 33,
@@ -424,7 +426,9 @@
       "badge": "-13%",
       "image": "images/prod-cgm.png",
       "desc": "Soft ear tips and comfortable chestpiece for precise auscultation. Lightweight design for all-day comfort.",
-      "tags": ["latest"]
+      "tags": [
+        "latest"
+      ]
     },
     {
       "id": 34,
@@ -437,7 +441,10 @@
       "badge": "-13%",
       "image": "images/prod-cgm.png",
       "desc": "Dual head stethoscope for adult and pediatric diagnosis. High-grade material with superior sound transmission.",
-      "tags": ["bestseller", "latest"]
+      "tags": [
+        "bestseller",
+        "latest"
+      ]
     },
     {
       "id": 35,
@@ -450,7 +457,9 @@
       "badge": "-16%",
       "image": "images/prod-cgm.png",
       "desc": "High-grade zinc alloy dual head stethoscope. Deluxe series with enhanced acoustic performance.",
-      "tags": ["latest"]
+      "tags": [
+        "latest"
+      ]
     },
     {
       "id": 36,
@@ -463,7 +472,10 @@
       "badge": "-10%",
       "image": "images/prod-cgm.png",
       "desc": "Lightweight luxury stethoscope with stainless steel finish. Smart design for modern healthcare professionals.",
-      "tags": ["best", "latest"]
+      "tags": [
+        "best",
+        "latest"
+      ]
     },
     {
       "id": 37,
@@ -476,7 +488,9 @@
       "badge": "-17%",
       "image": "images/prod-cgm.png",
       "desc": "Basic lightweight stethoscope for clinical monitoring. Affordable and reliable for everyday use.",
-      "tags": ["latest"]
+      "tags": [
+        "latest"
+      ]
     },
     {
       "id": 38,
@@ -489,7 +503,9 @@
       "badge": "-10%",
       "image": "images/prod-cgm.png",
       "desc": "Specialized pediatric chestpiece for infant and child diagnosis. Extra-small bell for accurate readings.",
-      "tags": ["latest"]
+      "tags": [
+        "latest"
+      ]
     },
     {
       "id": 39,
@@ -502,7 +518,10 @@
       "badge": "-11%",
       "image": "images/prod-cgm.png",
       "desc": "Electronic stethoscope with sound amplification features. Ideal for telemedicine and educational purposes.",
-      "tags": ["best", "latest"]
+      "tags": [
+        "best",
+        "latest"
+      ]
     },
     {
       "id": 40,
@@ -515,7 +534,9 @@
       "badge": "-18%",
       "image": "images/prod-cgm.png",
       "desc": "Single head stethoscope for regular blood pressure monitoring and basic clinical examination.",
-      "tags": ["latest"]
+      "tags": [
+        "latest"
+      ]
     },
     {
       "id": 41,
@@ -528,7 +549,9 @@
       "badge": "-8%",
       "image": "images/prod-cgm.png",
       "desc": "Dual-head master stethoscope designed for medical students and instructors. Y-connector for dual listening.",
-      "tags": ["latest"]
+      "tags": [
+        "latest"
+      ]
     },
     {
       "id": 42,
@@ -541,7 +564,10 @@
       "badge": "-17%",
       "image": "images/prod-yt2c.webp",
       "desc": "Quick forehead temperature check without contact. Fever alarm, memory function and large backlit display.",
-      "tags": ["bestseller", "latest"]
+      "tags": [
+        "bestseller",
+        "latest"
+      ]
     },
     {
       "id": 43,
@@ -554,7 +580,10 @@
       "badge": "-16%",
       "image": "images/prod-yx306.png",
       "desc": "SpO2 and pulse rate measurement with OLED display. Compact, accurate and easy to use.",
-      "tags": ["bestseller", "latest"]
+      "tags": [
+        "bestseller",
+        "latest"
+      ]
     },
     {
       "id": 44,
@@ -567,7 +596,9 @@
       "badge": "-20%",
       "image": "images/prod-yt1c.webp",
       "desc": "Fast and accurate oral temperature reading. Flexible tip with fever alarm and auto power-off.",
-      "tags": ["latest"]
+      "tags": [
+        "latest"
+      ]
     },
     {
       "id": 45,
@@ -580,7 +611,9 @@
       "badge": "-20%",
       "image": "images/prod-certeza-bm450.jpg",
       "desc": "Replacement BP cuff with bladder for use with manual sphygmomanometers. Dual tube design, multiple sizes available.",
-      "tags": ["latest"]
+      "tags": [
+        "latest"
+      ]
     },
     {
       "id": 46,
@@ -593,7 +626,10 @@
       "badge": "-15%",
       "image": "images/cat-oxygen.jpg",
       "desc": "Ultrasonic mesh atomizer for adults and kids. Portable, quiet operation with USB charging.",
-      "tags": ["best", "latest"]
+      "tags": [
+        "best",
+        "latest"
+      ]
     },
     {
       "id": 47,
@@ -606,7 +642,9 @@
       "badge": "-25%",
       "image": "images/prod-certeza-bm450.jpg",
       "desc": "Replacement rubber bulb for manual blood pressure apparatus. Durable with secure valve connection.",
-      "tags": ["latest"]
+      "tags": [
+        "latest"
+      ]
     },
     {
       "id": 48,
@@ -619,7 +657,10 @@
       "badge": "-12%",
       "image": "images/cat-oxygen.jpg",
       "desc": "Reusable silicone resuscitation bag for emergency medical support. Self-inflating with pressure relief valve.",
-      "tags": ["surgical", "latest"]
+      "tags": [
+        "surgical",
+        "latest"
+      ]
     },
     {
       "id": 49,
@@ -632,7 +673,9 @@
       "badge": "-9%",
       "image": "images/prod-ytx203.jpg",
       "desc": "Portable fetal heartbeat listening device with LCD display. Includes gel and earphones for home monitoring.",
-      "tags": ["latest"]
+      "tags": [
+        "latest"
+      ]
     },
     {
       "id": 50,
@@ -645,7 +688,9 @@
       "badge": "-17%",
       "image": "images/prod-cgm.png",
       "desc": "Sound amplification device for individuals with hearing difficulty. Discreet, lightweight and rechargeable.",
-      "tags": ["latest"]
+      "tags": [
+        "latest"
+      ]
     },
     {
       "id": 51,
@@ -658,7 +703,9 @@
       "badge": "-18%",
       "image": "images/prod-cgm.png",
       "desc": "Infrared heat therapy lamp for pain relief and muscle recovery. Adjustable angle with timer function.",
-      "tags": ["latest"]
+      "tags": [
+        "latest"
+      ]
     }
   ]
 }
