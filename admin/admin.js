@@ -813,7 +813,7 @@
       const items = Array.isArray(o.items) ? o.items : [];
       const itemsText = items.map(i => i.name + ' x' + i.qty).join(', ');
       const date = o.created_at ? new Date(o.created_at).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
-      const statusClass = o.status === 'accepted' ? 'status-accepted' : o.status === 'rejected' ? 'status-rejected' : o.status === 'shipped' ? 'status-shipped' : o.status === 'delivered' ? 'status-delivered' : 'status-pending';
+      const statusClass = o.status === 'completed' ? 'status-delivered' : 'status-pending';
       const note = o.note ? '<br><em style="font-size:11px;color:#888">Note: ' + esc(o.note) + '</em>' : '';
       tr.innerHTML = '<td><strong>' + esc(o.name) + '</strong>' + note + '</td>' +
         '<td>' + esc(o.phone) + '</td>' +
@@ -826,38 +826,13 @@
 
       const actions = tr.querySelector('.actions');
       if (o.status === 'pending') {
-        const acceptBtn = document.createElement('button');
-        acceptBtn.className = 'icon-btn';
-        acceptBtn.title = 'Accept';
-        acceptBtn.style.color = '#16a34a';
-        acceptBtn.textContent = '\u2714';
-        acceptBtn.addEventListener('click', () => updateOrder(o.id, 'accepted'));
-        actions.appendChild(acceptBtn);
-
-        const rejectBtn = document.createElement('button');
-        rejectBtn.className = 'icon-btn';
-        rejectBtn.title = 'Reject';
-        rejectBtn.style.color = '#dc2626';
-        rejectBtn.textContent = '\u2716';
-        rejectBtn.addEventListener('click', () => updateOrder(o.id, 'rejected'));
-        actions.appendChild(rejectBtn);
-      }
-      if (o.status !== 'delivered' && o.status !== 'rejected') {
-        const shipBtn = document.createElement('button');
-        shipBtn.className = 'icon-btn';
-        shipBtn.title = 'Mark shipped';
-        shipBtn.style.color = '#2563eb';
-        shipBtn.textContent = '\uD83D\uDCE6';
-        shipBtn.addEventListener('click', () => updateOrder(o.id, 'shipped'));
-        actions.appendChild(shipBtn);
-
-        const delBtn = document.createElement('button');
-        delBtn.className = 'icon-btn';
-        delBtn.title = 'Mark delivered';
-        delBtn.style.color = '#16a34a';
-        delBtn.textContent = '\u2714\uFE0F';
-        delBtn.addEventListener('click', () => updateOrder(o.id, 'delivered'));
-        actions.appendChild(delBtn);
+        const completeBtn = document.createElement('button');
+        completeBtn.className = 'icon-btn';
+        completeBtn.title = 'Mark Complete';
+        completeBtn.style.color = '#16a34a';
+        completeBtn.textContent = '\u2714';
+        completeBtn.addEventListener('click', () => updateOrder(o.id, 'completed'));
+        actions.appendChild(completeBtn);
       }
       tbody.appendChild(tr);
     });
@@ -870,27 +845,15 @@
     if (!el) return;
     const total = ordersData.length;
     const pending = ordersData.filter(o => o.status === 'pending').length;
-    const accepted = ordersData.filter(o => o.status === 'accepted').length;
-    const shipped = ordersData.filter(o => o.status === 'shipped').length;
-    const delivered = ordersData.filter(o => o.status === 'delivered').length;
-    const revenue = ordersData.filter(o => o.status !== 'rejected').reduce((s, o) => s + Number(o.total || 0), 0);
+    const completed = ordersData.filter(o => o.status === 'completed').length;
+    const revenue = ordersData.reduce((s, o) => s + Number(o.total || 0), 0);
     el.innerHTML = '<div class="stat-card"><span class="stat-val">' + total + '</span><span class="stat-lbl">Total</span></div>' +
       '<div class="stat-card"><span class="stat-val">' + pending + '</span><span class="stat-lbl">Pending</span></div>' +
-      '<div class="stat-card"><span class="stat-val">' + accepted + '</span><span class="stat-lbl">Accepted</span></div>' +
-      '<div class="stat-card"><span class="stat-val">' + shipped + '</span><span class="stat-lbl">Shipped</span></div>' +
-      '<div class="stat-card"><span class="stat-val">' + delivered + '</span><span class="stat-lbl">Delivered</span></div>' +
+      '<div class="stat-card"><span class="stat-val">' + completed + '</span><span class="stat-lbl">Completed</span></div>' +
       '<div class="stat-card"><span class="stat-val">\u20a8 ' + revenue.toLocaleString('en-PK') + '</span><span class="stat-lbl">Revenue</span></div>';
   }
 
-  function sendWhatsAppMessage(phone, message) {
-    let cleanPhone = phone.replace(/[^0-9]/g, '');
-    if (cleanPhone.startsWith('0')) cleanPhone = '92' + cleanPhone.substring(1);
-    if (!cleanPhone.startsWith('92')) cleanPhone = '92' + cleanPhone;
-    window.open('https://wa.me/' + cleanPhone + '?text=' + encodeURIComponent(message), '_blank');
-  }
-
   async function updateOrder(id, status) {
-    const order = ordersData.find(o => o.id === id);
     try {
       const res = await apiFetch(API + '/api/orders', {
         method: 'PUT',
@@ -898,39 +861,7 @@
         body: JSON.stringify({ id, status })
       });
       if (!res.ok) throw new Error('Failed');
-      toast('Order ' + status, 'ok');
-
-      if (order && (status === 'accepted' || status === 'rejected')) {
-        const items = Array.isArray(order.items) ? order.items : [];
-        const itemList = items.map(i => '* ' + i.name + ' x' + i.qty + ' = Rs ' + Number(i.price * i.qty).toLocaleString('en-PK')).join('\n');
-        const totalStr = 'Rs ' + Number(order.total || 0).toLocaleString('en-PK');
-
-        let msg = '';
-        if (status === 'accepted') {
-          msg = '\u2705 *Order Confirmed!*\n\n';
-          msg += 'Dear ' + order.name + ',\n\n';
-          msg += 'Your order has been *confirmed* and is being prepared.\n\n';
-          msg += '\uD83D\uDCE6 *Order Details:*\n' + itemList + '\n';
-          msg += '\n\uD83D\uDCB0 Total: *' + totalStr + '*\n';
-          msg += '\n\uD83D\uDCCD Shipping to: ' + (order.address || '') + '\n\n';
-          msg += 'We will notify you when it ships.\n';
-          msg += 'For queries call: 0300-9697327\n\n';
-          msg += '\u2014 *BAJWA SURGICAL*';
-        } else {
-          msg = '\u274C *Order Cancelled*\n\n';
-          msg += 'Dear ' + order.name + ',\n\n';
-          msg += 'Unfortunately, your order could not be processed at this time.\n\n';
-          msg += '\uD83D\uDCE6 *Order Details:*\n' + itemList + '\n';
-          msg += '\n\uD83D\uDCB0 Total: *' + totalStr + '*\n\n';
-          msg += 'We apologize for the inconvenience.\n';
-          msg += 'For queries call: 0300-9697327\n\n';
-          msg += '\u2014 *BAJWA SURGICAL*';
-        }
-
-        const sendNow = confirm('Send ' + status + ' WhatsApp message to ' + order.name + ' (' + order.phone + ')?');
-        if (sendNow) sendWhatsAppMessage(order.phone, msg);
-      }
-
+      toast('Order marked as ' + status, 'ok');
       loadOrders();
     } catch (e) {
       toast('Failed to update order', 'err');

@@ -347,22 +347,24 @@
       var data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed');
 
-      document.getElementById('orderConfirmId').textContent = 'Order ID: ' + (data.id || '').substring(0, 8) + ' | We will call you at ' + payload.phone + ' to confirm.';
+      var itemsList = items.map(function (it) { return it.name + ' x' + it.qty; }).join(', ');
+      document.getElementById('orderConfirmId').innerHTML =
+        '<strong>Order ID:</strong> ' + (data.id || '').substring(0, 8) + '<br>' +
+        '<strong>Customer:</strong> ' + esc(payload.name) + '<br>' +
+        '<strong>Phone:</strong> ' + esc(payload.phone) + '<br>' +
+        '<strong>Delivery Address:</strong> ' + esc(payload.address) + '<br>' +
+        '<strong>Items:</strong> ' + esc(itemsList) + '<br>' +
+        '<strong>Total:</strong> ' + fmt(payload.total);
+      if (payload.note) {
+        document.getElementById('orderConfirmId').innerHTML += '<br><strong>Note:</strong> ' + esc(payload.note);
+      }
       step2.hidden = true;
       step3.hidden = false;
 
-      /* Send WhatsApp to store owner with order details */
-      var waMsg = '\uD83D\uDCF1 New Order!\n\n';
-      waMsg += '\uD83D\uDC64 Customer: ' + payload.name + '\n';
-      waMsg += '\uD83D\uDCDE Phone: ' + payload.phone + '\n';
-      waMsg += '\uD83D\uDCCD Address: ' + payload.address + '\n\n';
-      waMsg += '\uD83D\uDED2 Items:\n';
-      items.forEach(function (it) { waMsg += '- ' + it.name + ' x' + it.qty + ' = ' + fmt(it.price * it.qty) + '\n'; });
-      waMsg += '\n\uD83D\uDCB0 Total: ' + fmt(payload.total) + '\n';
-      if (payload.note) waMsg += '\n\uD83D\uDCDD Note: ' + payload.note + '\n';
-
-      /* Open WhatsApp in background */
-      window.open('https://wa.me/' + STORE_PHONE_RAW + '?text=' + encodeURIComponent(waMsg), '_blank');
+      /* Clear cart after successful order */
+      cart = {};
+      localStorage.removeItem('cart');
+      renderCart();
 
     } catch (err) {
       toast('Error: ' + err.message);
