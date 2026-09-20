@@ -352,7 +352,7 @@
       step3.hidden = false;
 
       /* Send WhatsApp to store owner with order details */
-      var waMsg = '\uD83D\uDCES New Order!\n\n';
+      var waMsg = '\uD83D\uDCF1 New Order!\n\n';
       waMsg += '\uD83D\uDC64 Customer: ' + payload.name + '\n';
       waMsg += '\uD83D\uDCDE Phone: ' + payload.phone + '\n';
       waMsg += '\uD83D\uDCCD Address: ' + payload.address + '\n\n';
