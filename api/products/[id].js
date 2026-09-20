@@ -1,4 +1,4 @@
-const { getProductsSync, saveProducts } = require('../../lib/store');
+const { getProducts, saveProducts } = require('../../lib/store');
 const { isAdmin, jsonRes } = require('../../lib/auth');
 
 function sanitize(input, id) {
@@ -39,7 +39,7 @@ module.exports = async (req, res) => {
   const id = getId(req);
   if (isNaN(id)) return jsonRes(res, 400, { error: 'Invalid ID' });
 
-  const db = getProductsSync();
+  const db = await getProducts();
   const idx = db.products.findIndex(x => x.id === id);
   if (idx === -1) return jsonRes(res, 404, { error: 'Product not found' });
 

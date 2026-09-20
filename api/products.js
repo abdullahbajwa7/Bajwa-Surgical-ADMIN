@@ -1,4 +1,4 @@
-const { getProductsSync, saveProducts } = require('../lib/store');
+const { getProducts, saveProducts } = require('../lib/store');
 const { isAdmin, jsonRes } = require('../lib/auth');
 
 function sanitize(input, id) {
@@ -31,7 +31,7 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') { res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' }); return res.end(); }
 
   if (req.method === 'GET') {
-    const db = getProductsSync();
+    const db = await getProducts();
     return jsonRes(res, 200, db);
   }
 
@@ -39,7 +39,7 @@ module.exports = async (req, res) => {
     if (!isAdmin(req)) return jsonRes(res, 401, { error: 'Admin login required' });
     try {
       const body = await readBody(req);
-      const db = getProductsSync();
+      const db = await getProducts();
       const nextId = db.products.reduce((m, x) => Math.max(m, x.id), 0) + 1;
       const product = sanitize(body, nextId);
       if (!product.name) return jsonRes(res, 400, { error: 'Name is required' });
