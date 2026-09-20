@@ -1,6 +1,7 @@
 {
   "version": 2,
   "routes": [
+    { "src": "/$", "dest": "/admin/login.html" },
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/admin/login\\.html", "dest": "/admin/login.html" },
     { "src": "/admin/(.*)", "dest": "/admin/$1" },
