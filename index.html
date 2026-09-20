@@ -456,19 +456,73 @@
     <ul class="cart-items" id="cartItems"></ul>
   </div>
   <div class="cart-footer" id="cartFooter" hidden>
-    <p class="cart-subtotal">Subtotal: <strong id="cartSubtotal">Rs 0</strong></p>
-    <div id="cartFormWrap">
-      <form id="orderForm" class="order-form">
-        <input type="text" id="orderName" placeholder="Your Name" required>
-        <input type="tel" id="orderPhone" placeholder="Phone Number" required>
-        <textarea id="orderAddress" placeholder="Shipping Address" rows="2" required></textarea>
-        <button type="submit" class="btn-green btn-block" id="placeOrderBtn">Place Order</button>
-      </form>
-      <p id="orderStatus" style="display:none;text-align:center;padding:12px;font-weight:600;"></p>
-    </div>
-    <a href="#" id="waOrder" target="_blank" rel="noopener" class="btn-outline btn-block" style="margin-top:8px;font-size:13px;">Order via WhatsApp</a>
+    <p class="cart-subtotal">Subtotal: <strong id="cartSubtotal">₨ 0</strong></p>
+    <button class="btn-green btn-block order-now-trigger" id="orderNowBtn">Order Now</button>
   </div>
 </aside>
+
+<!-- Order Now Modal -->
+<div class="order-modal-overlay" id="orderModalOverlay" hidden>
+  <div class="order-modal">
+    <div class="order-modal-header">
+      <h2>Complete Your Order</h2>
+      <button class="modal-close-btn" id="orderModalClose">&times;</button>
+    </div>
+
+    <!-- Step 1: Customer Details Form -->
+    <div class="order-step" id="orderStep1">
+      <h3 class="order-step-title">Your Details</h3>
+      <form id="orderDetailsForm" class="order-form" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" id="custName" placeholder="e.g. Ahmed Khan" required>
+          </div>
+          <div class="form-group">
+            <label>Phone Number *</label>
+            <input type="tel" id="custPhone" placeholder="03XX-XXXXXXX" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>City *</label>
+          <input type="text" id="custCity" placeholder="e.g. Sahiwal, Lahore, Karachi" required>
+        </div>
+        <div class="form-group">
+          <label>Full Shipping Address *</label>
+          <textarea id="custAddress" placeholder="House #, Street, Area, Landmark" rows="2" required></textarea>
+        </div>
+        <div class="form-group">
+          <label>Order Note (optional)</label>
+          <textarea id="custNote" placeholder="Any special instructions..." rows="1"></textarea>
+        </div>
+        <p class="store-contact">Need help? Call us: <a href="tel:03009697327">0300-9697327</a></p>
+        <button type="submit" class="btn-green btn-block" id="confirmOrderBtn">Review Order</button>
+      </form>
+    </div>
+
+    <!-- Step 2: Order Review -->
+    <div class="order-step" id="orderStep2" hidden>
+      <h3 class="order-step-title">Review Your Order</h3>
+      <div class="order-review" id="orderReview"></div>
+      <div class="order-review-actions">
+        <button class="btn-outline" id="editOrderBtn">Edit Details</button>
+        <button class="btn-green" id="submitOrderBtn">Place Order</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Order Placed -->
+    <div class="order-step" id="orderStep3" hidden>
+      <div class="order-success">
+        <div class="success-icon">&#10003;</div>
+        <h3>Order Placed Successfully!</h3>
+        <p id="orderConfirmId"></p>
+        <p class="order-note">We will contact you shortly to confirm your order.</p>
+        <p class="store-contact">Contact: <a href="tel:03009697327">0300-9697327</a></p>
+        <button class="btn-green btn-block" id="orderDoneBtn">Continue Shopping</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Quick View Modal -->
 <div class="qv-overlay" id="qvOverlay" hidden>

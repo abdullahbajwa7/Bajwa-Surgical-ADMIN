@@ -814,7 +814,8 @@
       const itemsText = items.map(i => i.name + ' x' + i.qty).join(', ');
       const date = o.created_at ? new Date(o.created_at).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
       const statusClass = o.status === 'accepted' ? 'status-accepted' : o.status === 'rejected' ? 'status-rejected' : o.status === 'shipped' ? 'status-shipped' : o.status === 'delivered' ? 'status-delivered' : 'status-pending';
-      tr.innerHTML = '<td><strong>' + esc(o.name) + '</strong></td>' +
+      const note = o.note ? '<br><em style="font-size:11px;color:#888">Note: ' + esc(o.note) + '</em>' : '';
+      tr.innerHTML = '<td><strong>' + esc(o.name) + '</strong>' + note + '</td>' +
         '<td>' + esc(o.phone) + '</td>' +
         '<td style="max-width:180px;font-size:12px">' + esc(o.address) + '</td>' +
         '<td style="max-width:200px;font-size:12px">' + esc(itemsText) + '</td>' +
@@ -881,7 +882,15 @@
       '<div class="stat-card"><span class="stat-val">\u20a8 ' + revenue.toLocaleString('en-PK') + '</span><span class="stat-lbl">Revenue</span></div>';
   }
 
+  function sendWhatsAppMessage(phone, message) {
+    let cleanPhone = phone.replace(/[^0-9]/g, '');
+    if (cleanPhone.startsWith('0')) cleanPhone = '92' + cleanPhone.substring(1);
+    if (!cleanPhone.startsWith('92')) cleanPhone = '92' + cleanPhone;
+    window.open('https://wa.me/' + cleanPhone + '?text=' + encodeURIComponent(message), '_blank');
+  }
+
   async function updateOrder(id, status) {
+    const order = ordersData.find(o => o.id === id);
     try {
       const res = await apiFetch(API + '/api/orders', {
         method: 'PUT',
@@ -890,6 +899,38 @@
       });
       if (!res.ok) throw new Error('Failed');
       toast('Order ' + status, 'ok');
+
+      if (order && (status === 'accepted' || status === 'rejected')) {
+        const items = Array.isArray(order.items) ? order.items : [];
+        const itemList = items.map(i => '* ' + i.name + ' x' + i.qty + ' = Rs ' + Number(i.price * i.qty).toLocaleString('en-PK')).join('\n');
+        const totalStr = 'Rs ' + Number(order.total || 0).toLocaleString('en-PK');
+
+        let msg = '';
+        if (status === 'accepted') {
+          msg = '\u2705 *Order Confirmed!*\n\n';
+          msg += 'Dear ' + order.name + ',\n\n';
+          msg += 'Your order has been *confirmed* and is being prepared.\n\n';
+          msg += '\uD83D\uDCE6 *Order Details:*\n' + itemList + '\n';
+          msg += '\n\uD83D\uDCB0 Total: *' + totalStr + '*\n';
+          msg += '\n\uD83D\uDCCD Shipping to: ' + (order.address || '') + '\n\n';
+          msg += 'We will notify you when it ships.\n';
+          msg += 'For queries call: 0300-9697327\n\n';
+          msg += '\u2014 *BAJWA SURGICAL*';
+        } else {
+          msg = '\u274C *Order Cancelled*\n\n';
+          msg += 'Dear ' + order.name + ',\n\n';
+          msg += 'Unfortunately, your order could not be processed at this time.\n\n';
+          msg += '\uD83D\uDCE6 *Order Details:*\n' + itemList + '\n';
+          msg += '\n\uD83D\uDCB0 Total: *' + totalStr + '*\n\n';
+          msg += 'We apologize for the inconvenience.\n';
+          msg += 'For queries call: 0300-9697327\n\n';
+          msg += '\u2014 *BAJWA SURGICAL*';
+        }
+
+        const sendNow = confirm('Send ' + status + ' WhatsApp message to ' + order.name + ' (' + order.phone + ')?');
+        if (sendNow) sendWhatsAppMessage(order.phone, msg);
+      }
+
       loadOrders();
     } catch (e) {
       toast('Failed to update order', 'err');

@@ -18,8 +18,10 @@
   }
 
   var ADMIN_API = '/api/products';
+  var STORE_PHONE = '0300-9697327';
+  var STORE_PHONE_RAW = '923009697327';
   var FALLBACK = {
-    currency: 'Rs',
+    currency: '\u20a8',
     products: [
       { id: 1, name: 'Bliss Reuseable Urine Bag', category: 'Urine Bags', price: 2799, regularPrice: 3500, rating: 4.5, badge: '-20%', image: 'images/prod-urine-bag.jpg', desc: 'Reusable, leak-proof urine bag.', tags: ['best', 'bestseller'] },
       { id: 2, name: 'Blueidea BLD-326 Massager Gun', category: 'Massager', price: 4499, regularPrice: 5000, rating: 4.5, badge: '-10%', image: 'images/prod-massager-gun.jpg', desc: 'Deep tissue massage gun.', tags: ['best', 'bestseller'] },
@@ -28,7 +30,7 @@
     ]
   };
 
-  var state = { currency: 'Rs', products: [], loaded: false, hash: '', storeNameLabel: 'Bajwa Surgical' };
+  var state = { currency: '\u20a8', products: [], loaded: false, hash: '', storeNameLabel: 'Bajwa Surgical' };
 
   try {
     fetch('/api/analytics', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'visitor' }), mode: 'cors' });
@@ -56,7 +58,7 @@
       return fetchJSON('products.json').catch(function () { return FALLBACK; });
     }).then(function (data) {
       var products = (data && Array.isArray(data.products) && data.products.length) ? data.products : FALLBACK.products;
-      state.currency = (data && data.currency) || 'Rs';
+      state.currency = (data && data.currency) || '\u20a8';
       state.products = products;
       state.hash = JSON.stringify(products);
       state.loaded = true;
@@ -168,9 +170,6 @@
   var cartEmpty = document.getElementById('cartEmpty');
   var cartFooter = document.getElementById('cartFooter');
   var cartSubtotal = document.getElementById('cartSubtotal');
-  var waOrder = document.getElementById('waOrder');
-  var orderForm = document.getElementById('orderForm');
-  var orderStatus = document.getElementById('orderStatus');
 
   function saveCart() {
     try { localStorage.setItem('bajwa_cart', JSON.stringify(cart)); } catch (e) {}
@@ -205,8 +204,6 @@
       cartItems.appendChild(li);
     });
     cartSubtotal.textContent = fmt(total);
-    var lines = Object.keys(cart).map(function (id) { var l = cart[id]; return '* ' + l.name + ' - ' + fmt(l.price) + ' x ' + l.qty; }).join('\n');
-    waOrder.href = 'https://wa.me/923009697327?text=' + encodeURIComponent('Hello, I want to order:\n\n' + lines + '\n\nTotal: ' + fmt(total));
     saveCart();
   }
 
@@ -235,52 +232,144 @@
   document.getElementById('cartToggle').addEventListener('click', openCart);
   document.getElementById('cartClose').addEventListener('click', closeCart);
   overlay.addEventListener('click', closeCart);
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeCart(); closeQV(); } });
 
-  /* ============ ORDER FORM ============ */
-  if (orderForm) {
-    orderForm.addEventListener('submit', async function (e) {
-      e.preventDefault();
-      var name = document.getElementById('orderName').value.trim();
-      var phone = document.getElementById('orderPhone').value.trim();
-      var address = document.getElementById('orderAddress').value.trim();
-      if (!name || !phone || !address) return toast('Please fill all fields');
-      if (cartCount() === 0) return toast('Cart is empty');
+  /* ============ ORDER MODAL ============ */
+  var orderOverlay = document.getElementById('orderModalOverlay');
+  var step1 = document.getElementById('orderStep1');
+  var step2 = document.getElementById('orderStep2');
+  var step3 = document.getElementById('orderStep3');
+  var orderDetailsForm = document.getElementById('orderDetailsForm');
+  var orderReview = document.getElementById('orderReview');
 
-      var items = Object.keys(cart).map(function (id) {
-        return { id: +id, name: cart[id].name, price: cart[id].price, qty: cart[id].qty };
-      });
-      var total = cartTotal();
-
-      var btn = document.getElementById('placeOrderBtn');
-      btn.disabled = true;
-      btn.textContent = 'Placing Order...';
-      orderStatus.style.display = 'none';
-
-      try {
-        var res = await fetch('/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: name, phone: phone, address: address, items: items, total: total })
-        });
-        var data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed');
-        orderStatus.style.display = 'block';
-        orderStatus.style.color = '#1a7a52';
-        orderStatus.textContent = 'Order placed successfully! We will contact you soon. Order ID: ' + (data.id || '').substring(0, 8);
-        cart = {};
-        saveCart();
-        renderCart();
-        orderForm.reset();
-      } catch (err) {
-        orderStatus.style.display = 'block';
-        orderStatus.style.color = '#dc3545';
-        orderStatus.textContent = 'Error: ' + err.message;
-      }
-      btn.disabled = false;
-      btn.textContent = 'Place Order';
-    });
+  function openOrderModal() {
+    if (cartCount() === 0) { toast('Your cart is empty!'); return; }
+    closeCart();
+    step1.hidden = false;
+    step2.hidden = true;
+    step3.hidden = true;
+    orderOverlay.hidden = false;
+    document.body.classList.add('no-scroll');
+    /* Pre-fill from localStorage */
+    try {
+      var saved = JSON.parse(localStorage.getItem('bajwa_customer') || '{}');
+      if (saved.name) document.getElementById('custName').value = saved.name;
+      if (saved.phone) document.getElementById('custPhone').value = saved.phone;
+      if (saved.city) document.getElementById('custCity').value = saved.city;
+      if (saved.address) document.getElementById('custAddress').value = saved.address;
+    } catch (e) {}
   }
+
+  function closeOrderModal() {
+    orderOverlay.hidden = true;
+    document.body.classList.remove('no-scroll');
+  }
+
+  document.getElementById('orderNowBtn').addEventListener('click', openOrderModal);
+  document.getElementById('orderModalClose').addEventListener('click', closeOrderModal);
+  document.getElementById('editOrderBtn').addEventListener('click', function () {
+    step2.hidden = true;
+    step1.hidden = false;
+  });
+  document.getElementById('orderDoneBtn').addEventListener('click', function () {
+    closeOrderModal();
+    cart = {};
+    saveCart();
+    renderCart();
+  });
+  orderOverlay.addEventListener('click', function (e) { if (e.target === orderOverlay) closeOrderModal(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeOrderModal(); closeCart(); closeQV(); } });
+
+  /* Step 1: validate + go to review */
+  orderDetailsForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = document.getElementById('custName').value.trim();
+    var phone = document.getElementById('custPhone').value.trim();
+    var city = document.getElementById('custCity').value.trim();
+    var address = document.getElementById('custAddress').value.trim();
+    if (!name || !phone || !city || !address) { toast('Please fill all required fields'); return; }
+
+    /* Save to localStorage for next time */
+    try {
+      localStorage.setItem('bajwa_customer', JSON.stringify({ name: name, phone: phone, city: city, address: address }));
+    } catch (e) {}
+
+    /* Build review */
+    var items = Object.keys(cart).map(function (id) {
+      var line = cart[id];
+      return { id: +id, name: line.name, price: line.price, qty: line.qty };
+    });
+    var total = cartTotal();
+    var lines = items.map(function (it) {
+      return '<div class="review-item"><span>' + esc(it.name) + ' &times; ' + it.qty + '</span><span>' + fmt(it.price * it.qty) + '</span></div>';
+    }).join('');
+
+    orderReview.innerHTML =
+      '<div class="review-section"><h4>Customer Details</h4>' +
+      '<p><strong>Name:</strong> ' + esc(name) + '</p>' +
+      '<p><strong>Phone:</strong> ' + esc(phone) + '</p>' +
+      '<p><strong>City:</strong> ' + esc(city) + '</p>' +
+      '<p><strong>Address:</strong> ' + esc(address) + '</p>' +
+      (document.getElementById('custNote').value.trim() ? '<p><strong>Note:</strong> ' + esc(document.getElementById('custNote').value.trim()) + '</p>' : '') +
+      '</div>' +
+      '<div class="review-section"><h4>Order Items</h4>' + lines +
+      '<div class="review-total"><span>Total</span><span>' + fmt(total) + '</span></div></div>' +
+      '<p class="review-contact">Contact: <a href="tel:' + STORE_PHONE_RAW + '">' + STORE_PHONE + '</a></p>';
+
+    step1.hidden = true;
+    step2.hidden = false;
+  });
+
+  /* Step 2: submit order */
+  document.getElementById('submitOrderBtn').addEventListener('click', async function () {
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = 'Placing Order...';
+
+    var items = Object.keys(cart).map(function (id) {
+      return { id: +id, name: cart[id].name, price: cart[id].price, qty: cart[id].qty };
+    });
+
+    var payload = {
+      name: document.getElementById('custName').value.trim(),
+      phone: document.getElementById('custPhone').value.trim(),
+      address: document.getElementById('custCity').value.trim() + ', ' + document.getElementById('custAddress').value.trim(),
+      items: items,
+      total: cartTotal(),
+      note: document.getElementById('custNote').value.trim()
+    };
+
+    try {
+      var res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
+
+      document.getElementById('orderConfirmId').textContent = 'Order ID: ' + (data.id || '').substring(0, 8) + ' | We will call you at ' + payload.phone + ' to confirm.';
+      step2.hidden = true;
+      step3.hidden = false;
+
+      /* Send WhatsApp to store owner with order details */
+      var waMsg = '\uD83D\uDCES New Order!\n\n';
+      waMsg += '\uD83D\uDC64 Customer: ' + payload.name + '\n';
+      waMsg += '\uD83D\uDCDE Phone: ' + payload.phone + '\n';
+      waMsg += '\uD83D\uDCCD Address: ' + payload.address + '\n\n';
+      waMsg += '\uD83D\uDED2 Items:\n';
+      items.forEach(function (it) { waMsg += '- ' + it.name + ' x' + it.qty + ' = ' + fmt(it.price * it.qty) + '\n'; });
+      waMsg += '\n\uD83D\uDCB0 Total: ' + fmt(payload.total) + '\n';
+      if (payload.note) waMsg += '\n\uD83D\uDCDD Note: ' + payload.note + '\n';
+
+      /* Open WhatsApp in background */
+      window.open('https://wa.me/' + STORE_PHONE_RAW + '?text=' + encodeURIComponent(waMsg), '_blank');
+
+    } catch (err) {
+      toast('Error: ' + err.message);
+    }
+    btn.disabled = false;
+    btn.textContent = 'Place Order';
+  });
 
   /* Quick View */
   var qvOverlay = document.getElementById('qvOverlay');
@@ -388,6 +477,7 @@
     overlay.classList.remove('open');
     overlay.hidden = true;
     qvOverlay.hidden = true;
+    if (orderOverlay) orderOverlay.hidden = true;
     document.body.classList.remove('no-scroll');
   }
   forceClearOverlays();
@@ -404,7 +494,7 @@
   setInterval(function () {
     fetchJSON(ADMIN_API, 3000).then(function (data) {
       var h = JSON.stringify(data.products);
-      if (h !== state.hash) { state.products = data.products; state.currency = data.currency || 'Rs'; state.hash = h; renderSections(); toast('Catalog updated'); }
+      if (h !== state.hash) { state.products = data.products; state.currency = data.currency || '\u20a8'; state.hash = h; renderSections(); toast('Catalog updated'); }
     }).catch(function () {});
   }, 30000);
 })();

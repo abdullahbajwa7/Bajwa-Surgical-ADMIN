@@ -44,6 +44,7 @@ module.exports = async (req, res) => {
         address: body.address,
         items: body.items,
         total: body.total || 0,
+        note: body.note || '',
       });
       return jsonRes(res, 201, order);
     } catch (err) {
