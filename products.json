@@ -22,21 +22,6 @@
   ],
   "products": [
     {
-      "id": 5,
-      "name": "10 IN 1 / 11 IN 1 Hydra Facial Machine",
-      "category": "Beauty & Facial",
-      "price": 210000,
-      "priceMax": null,
-      "regularPrice": 220000,
-      "rating": 5,
-      "badge": "Sale!",
-      "image": "images/prod-hydra.jpg",
-      "desc": "Professional multi-function hydra facial machine with peeling, ultrasound, RF, vacuum and LED therapy modes for spa and clinic use.",
-      "tags": [
-        "recent"
-      ]
-    },
-    {
       "id": 8,
       "name": "Yuwell YX-306 Pulse Oximeter",
       "category": "Pulse Oximeter",
