@@ -25,16 +25,15 @@
       "id": 8,
       "name": "Yuwell YX-307 Pulse Oximeter",
       "category": "Pulse Oximeter",
-      "price": 4500,
+      "price": 3999,
       "priceMax": null,
-      "regularPrice": null,
+      "regularPrice": 5000,
       "rating": 4.5,
       "badge": "-11%",
       "image": "images/prod-yx306.png",
       "desc": "Accurate fingertip pulse oximeter with OLED display, SpO2 and pulse rate measurement, auto power-off and low-battery indicator.",
       "tags": [
-        "latest",
-        "surgical"
+        "latest"
       ]
     },
     {
