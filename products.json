@@ -52,21 +52,6 @@
       ]
     },
     {
-      "id": 10,
-      "name": "Yuwell YX-102 Fingertip Pulse Oximeter",
-      "category": "Pulse Oximeter",
-      "price": 3899,
-      "priceMax": null,
-      "regularPrice": 4000,
-      "rating": 4.5,
-      "badge": "-3%",
-      "image": "images/prod-yx102.webp",
-      "desc": "Compact fingertip pulse oximeter with large display and one-button operation. Ideal for sports, aviation and home use.",
-      "tags": [
-        "latest"
-      ]
-    },
-    {
       "id": 11,
       "name": "Yuwell YU-610 Overbed Table",
       "category": "Patient Furniture",
