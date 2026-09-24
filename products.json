@@ -23,10 +23,10 @@
   "products": [
     {
       "id": 4,
-      "name": "Sinocare UG Acid & Glucose Monitor",
+      "name": "Sinocare UG Uric Acid & Glucose Monitor",
       "category": "Uric Acid Test Meter",
       "price": 10000,
-      "priceMax": 5699,
+      "priceMax": 5736,
       "regularPrice": null,
       "rating": 5,
       "badge": null,
