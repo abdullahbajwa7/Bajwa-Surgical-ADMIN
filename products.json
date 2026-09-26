@@ -724,6 +724,19 @@
       "image": "images/prod-cgm.png",
       "desc": "",
       "tags": []
+    },
+    {
+      "id": 57,
+      "name": "ZZ Roundtrip Test",
+      "category": "test",
+      "price": 1,
+      "priceMax": null,
+      "regularPrice": null,
+      "rating": 0,
+      "badge": null,
+      "image": "images/prod-cgm.png",
+      "desc": "",
+      "tags": []
     }
   ]
 }
